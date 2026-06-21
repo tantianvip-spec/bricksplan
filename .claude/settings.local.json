@@ -5,7 +5,10 @@
       "Bash(git init *)",
       "Bash(git config *)",
       "Bash(git add *)",
-      "Bash(git commit -q -m 'Add LEGO photo build finder design doc *)"
+      "Bash(git commit -q -m 'Add LEGO photo build finder design doc *)",
+      "Bash(head -n 2770 /sdcard/Download/claudeproj/docs/superpowers/plans/2026-06-21-m1-backend-skeleton-and-recognize.md)",
+      "Read(//tmp/**)",
+      "Bash(git commit -q -m 'Add M1 plan: backend skeleton + recognize + GHCR deploy *)"
     ]
   }
 }

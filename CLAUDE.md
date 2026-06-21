@@ -65,17 +65,20 @@ Three GitHub Actions workflows, one responsibility each:
 
 1. `backend-ci.yml` — runs on every PR and push that touches `backend/`.
    Lints, type-checks, runs unit tests with coverage. Blocks merge on failure.
-2. `backend-image.yml` — runs on push to `main` touching `backend/`. Builds
-   the Docker image and pushes to `ghcr.io/<owner-lowercase>/brickfinder-backend`
-   with tags `latest` and `sha-<short>`. Uses the workflow's `GITHUB_TOKEN`.
-3. `backend-deploy.yml` — triggers after `backend-image` succeeds (or via
-   manual dispatch). SSHes into the deploy server, rewrites `IMAGE_TAG` in
-   `/opt/brickfinder/.env`, runs `docker compose pull && up -d`, then health-
-   checks `/health` with 30 retries × 2s. Fails the workflow (and surfaces
-   container logs) if health doesn't come back.
+2. `backend-image.yml` — runs on push to `main` or a `v*` tag touching
+   `backend/`. Builds the Docker image and pushes to
+   `ghcr.io/<owner-lowercase>/brickfinder-backend` with tags `latest` and
+   `sha-<short>`. Uses the workflow's `GITHUB_TOKEN`.
+3. `backend-deploy.yml` — triggers after `backend-image` succeeds, on a `v*`
+   tag push, or via manual dispatch. SSHes into the deploy server, rewrites
+   `IMAGE_TAG` in `/opt/brickfinder/.env`, runs `docker compose pull && up -d`,
+   then health-checks `/health` with 60 retries × 5s. Fails the workflow (and
+   surfaces container logs) if health doesn't come back.
 
 `workflow_dispatch` is enabled on the image and deploy workflows so we can
-rebuild or redeploy a specific tag without pushing new code.
+rebuild or redeploy a specific tag without pushing new code. Pushing a tag
+`v0.x.x` automatically builds and deploys that tag; `main` branch pushes still
+deploy `latest`.
 
 ## Deployment topology
 
@@ -94,13 +97,16 @@ workflows. Point Caddy/Nginx at `localhost:8000` if you need HTTPS.
 
 ## Required GitHub repo secrets
 
-- `DEPLOY_HOST` — server hostname or IP
-- `DEPLOY_USER` — typically `deploy`
+- `DEPLOY_HOST` — server hostname or IP (current: `121.37.166.59`)
+- `DEPLOY_USER` — `root` on the current Huawei Cloud server (use a dedicated
+  `deploy` user for production if possible)
 - `DEPLOY_SSH_KEY` — private SSH key whose public half is in
-  `~deploy/.ssh/authorized_keys` on the server
-- `DEPLOY_PORT` — usually `22`
+  `~root/.ssh/authorized_keys` on the server
+- `DEPLOY_PORT` — `22`
 
 No registry credentials needed for push — `GITHUB_TOKEN` covers GHCR auth.
+The server pulls public GHCR images without login; private packages would
+require a one-time `docker login ghcr.io`.
 
 ## Coding conventions
 
@@ -134,6 +140,10 @@ No registry credentials needed for push — `GITHUB_TOKEN` covers GHCR auth.
 - **No accounts**: backup is a JSON file the user exports/imports manually.
   The backend stores no user business data — only rate-limit counters and
   request logs (no PII, no images).
+- **Deploy timeout**: GHCR pulls from mainland China take ~3 minutes, so the
+  SSH deploy step uses a 10-minute timeout and 60 × 5s health retries.
+- **Tag releases**: Pushing a `v*` tag triggers both image build and deploy.
+  Main-branch pushes still deploy `latest`.
 
 ## When in doubt
 

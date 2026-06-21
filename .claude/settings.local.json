@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /mnt/sdcard/Download/claudeproj/docs/superpowers/specs)",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Add LEGO photo build finder design doc *)"
+    ]
+  }
+}

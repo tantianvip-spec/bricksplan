@@ -37,6 +37,8 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT }}
+          timeout: 10m
+          command_timeout: 10m
           script: |
             set -euo pipefail
             cd /opt/brickfinder
@@ -47,14 +49,15 @@ jobs:
             IMAGE_TAG=${{ steps.tag.outputs.value }}
             EOF
 
+            # Pull may take several minutes from GHCR on servers in mainland China.
             docker compose pull backend
             docker compose up -d --remove-orphans
 
-            # Smoke test /health with retries.
+            # Smoke test /health with retries (up to ~5 minutes).
             ok=0
-            for i in $(seq 1 30); do
+            for i in $(seq 1 60); do
               if curl -fsS http://localhost:8000/health >/dev/null; then ok=1; break; fi
-              sleep 2
+              sleep 5
             done
             if [ "$ok" -ne 1 ]; then
               echo "Health check failed; container logs:" >&2

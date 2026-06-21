@@ -3,6 +3,7 @@ name: backend-image
 on:
   push:
     branches: [main]
+    tags: ["v*"]
     paths:
       - "backend/**"
       - ".github/workflows/backend-image.yml"

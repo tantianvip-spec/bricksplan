@@ -28,7 +28,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "api_call_log",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
+        sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column(
             "ts", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
         ),

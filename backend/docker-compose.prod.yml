@@ -1,13 +1,54 @@
-# Production compose. Lives on the deploy server at /opt/brickfinder/docker-compose.yml.
-# M1 hello-world stage: only the backend service. Postgres + Redis are added in M1 Task 14.
+# Production compose. Lives on the remote server at /opt/brickfinder/.
+# Image tag is rewritten by CI/CD; ${IMAGE_TAG} default is "latest".
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   backend:
     image: ghcr.io/${GHCR_OWNER}/brickfinder-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      BRICKOGNIZE_BASE_URL: https://api.brickognize.com
+      BRICKOGNIZE_TIMEOUT_SECONDS: "30"
+      RATE_LIMIT_RECOGNIZE_PER_DAY: "100"
+      CIRCUIT_BREAKER_THRESHOLD: "10"
+      CIRCUIT_BREAKER_COOLDOWN_SECONDS: "30"
+      UPLOAD_MAX_BYTES: "8388608"
     ports:
       - "8000:8000"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:

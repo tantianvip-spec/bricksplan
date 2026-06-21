@@ -11,7 +11,7 @@ on:
       - ".github/workflows/backend-ci.yml"
 
 jobs:
-  unit-test:
+  lint-and-unit-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,4 +24,6 @@ jobs:
           cache: pip
           cache-dependency-path: backend/pyproject.toml
       - run: pip install -e ".[dev]"
-      - run: pytest tests/unit -v
+      - run: ruff check .
+      - run: mypy src
+      - run: pytest tests/unit -v --cov=brickfinder --cov-report=term-missing

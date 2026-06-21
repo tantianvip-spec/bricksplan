@@ -16,7 +16,7 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Compute lowercase owner
@@ -28,6 +28,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "value=${{ github.event.inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "value=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
           else
             echo "value=latest" >> "$GITHUB_OUTPUT"
           fi
@@ -45,11 +47,18 @@ jobs:
             set -euo pipefail
             cd /opt/brickfinder
 
-            # Write/refresh .env (idempotent).
-            cat > .env <<EOF
-            GHCR_OWNER=${{ steps.owner.outputs.value }}
-            IMAGE_TAG=${{ steps.tag.outputs.value }}
-            EOF
+            # Update image coordinates in .env without touching secrets.
+            _set_env() {
+              local key="$1"
+              local value="$2"
+              if grep -q "^${key}=" .env; then
+                sed -i "s|^${key}=.*|${key}=${value}|" .env
+              else
+                echo "${key}=${value}" >> .env
+              fi
+            }
+            _set_env GHCR_OWNER ${{ steps.owner.outputs.value }}
+            _set_env IMAGE_TAG ${{ steps.tag.outputs.value }}
 
             # Pull may take several minutes from GHCR on servers in mainland China.
             docker compose pull backend

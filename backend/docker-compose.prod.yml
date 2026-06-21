@@ -1,0 +1,13 @@
+# Production compose. Lives on the deploy server at /opt/brickfinder/docker-compose.yml.
+# M1 hello-world stage: only the backend service. Postgres + Redis are added in M1 Task 14.
+services:
+  backend:
+    image: ghcr.io/${GHCR_OWNER}/brickfinder-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

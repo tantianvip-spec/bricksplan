@@ -1,0 +1,64 @@
+name: backend-deploy
+
+on:
+  workflow_run:
+    workflows: ["backend-image"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (default: latest)"
+        required: false
+        default: "latest"
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute lowercase owner
+        id: owner
+        run: echo "value=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            set -euo pipefail
+            cd /opt/brickfinder
+
+            # Write/refresh .env (idempotent).
+            cat > .env <<EOF
+            GHCR_OWNER=${{ steps.owner.outputs.value }}
+            IMAGE_TAG=${{ steps.tag.outputs.value }}
+            EOF
+
+            docker compose pull backend
+            docker compose up -d --remove-orphans
+
+            # Smoke test /health with retries.
+            ok=0
+            for i in $(seq 1 30); do
+              if curl -fsS http://localhost:8000/health >/dev/null; then ok=1; break; fi
+              sleep 2
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "Health check failed; container logs:" >&2
+              docker compose logs --tail=200 backend || true
+              exit 1
+            fi
+            echo "Deployed: tag=${{ steps.tag.outputs.value }}"

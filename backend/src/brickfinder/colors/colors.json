@@ -1,0 +1,14 @@
+{
+  "colors": [
+    {"id": 0, "name": "Black", "aliases": ["black"]},
+    {"id": 1, "name": "Blue", "aliases": ["blue"]},
+    {"id": 2, "name": "Green", "aliases": ["green"]},
+    {"id": 4, "name": "Red", "aliases": ["red"]},
+    {"id": 5, "name": "Dark Pink", "aliases": ["darkpink", "dark pink"]},
+    {"id": 7, "name": "Light Gray", "aliases": ["light gray", "lightgray", "lightgrey", "light grey"]},
+    {"id": 14, "name": "Yellow", "aliases": ["yellow"]},
+    {"id": 15, "name": "White", "aliases": ["white"]},
+    {"id": 71, "name": "Light Bluish Gray", "aliases": ["light bluish gray", "lightbluishgray"]},
+    {"id": 72, "name": "Dark Bluish Gray", "aliases": ["dark bluish gray", "darkbluishgray"]}
+  ]
+}

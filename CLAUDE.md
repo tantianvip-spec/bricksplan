@@ -67,16 +67,15 @@ Three GitHub Actions workflows, one responsibility each:
 1. `backend-ci.yml` — runs on every PR and push that touches `backend/`.
    Lints, type-checks, runs unit tests with coverage. Blocks merge on failure.
 2. `backend-image.yml` — runs on push to `main` or a `v*` tag touching
-   `backend/`. Builds the Docker image and pushes to
-   `ghcr.io/<owner-lowercase>/brickfinder-backend` with tags `latest`,
-   `sha-<short>`, and the git tag name (for `v*` tags). Uses the workflow's
-   `GITHUB_TOKEN`.
+   `backend/`. Builds the Docker image and pushes to both GHCR and Alibaba
+   Cloud ACR (for fast pulls from mainland China) with tags `latest`,
+   `sha-<short>`, and the git tag name. Uses `GITHUB_TOKEN` for GHCR and
+   `ALIYUN_REGISTRY_USERNAME`/`ALIYUN_REGISTRY_PASSWORD` secrets for ACR.
 3. `backend-deploy.yml` — triggers after `backend-image` succeeds, on a `v*`
    tag push, or via manual dispatch. SSHes into the deploy server, rewrites
-   `IMAGE_TAG` and `GHCR_OWNER` in `/opt/brickfinder/.env` without touching
-   secrets, runs `docker compose pull && up -d`, then health-checks `/health`
-   with 60 retries × 5s. Fails the workflow (and surfaces container logs) if
-   health doesn't come back.
+   `IMAGE_TAG` in `/opt/brickfinder/.env`, runs `docker compose pull && up -d`,
+   then health-checks `/health` with 60 retries × 5s. Fails the workflow (and
+   surfaces container logs) if health doesn't come back.
 
 `workflow_dispatch` is enabled on the image and deploy workflows so we can
 rebuild or redeploy a specific tag without pushing new code. Pushing a tag
@@ -91,9 +90,12 @@ Redis). The compose file and the `.env` (with secrets + image tag) live in
 `deploy/server-bootstrap.md`. The deploy workflow only rewrites `IMAGE_TAG`,
 pulls, and restarts — it never edits compose files or recreates volumes.
 
-Image registry: GitHub Container Registry (`ghcr.io`). If the package is
-private, the server needs `docker login ghcr.io` with a classic PAT
-(`read:packages`) one time.
+Image registry: images are pushed to both GitHub Container Registry (GHCR,
+global fallback) and Alibaba Cloud Container Registry (ACR, primary for
+deploy). The server pulls from ACR for fast downloads in mainland China.
+ACR credentials (`ALIYUN_REGISTRY_USERNAME`/`ALIYUN_REGISTRY_PASSWORD`) are
+stored as GitHub repo secrets and used by the image workflow for push; the
+server does `docker login` once during bootstrap.
 
 Reverse proxy / TLS is out of scope for M1 and not configured by these
 workflows. Point Caddy/Nginx at `localhost:8000` if you need HTTPS.
@@ -106,10 +108,11 @@ workflows. Point Caddy/Nginx at `localhost:8000` if you need HTTPS.
 - `DEPLOY_SSH_KEY` — private SSH key whose public half is in
   `~root/.ssh/authorized_keys` on the server
 - `DEPLOY_PORT` — `22`
+- `ALIYUN_REGISTRY_USERNAME` — Alibaba Cloud ACR username (for CI push)
+- `ALIYUN_REGISTRY_PASSWORD` — Alibaba Cloud ACR password (for CI push)
 
-No registry credentials needed for push — `GITHUB_TOKEN` covers GHCR auth.
-The server pulls public GHCR images without login; private packages would
-require a one-time `docker login ghcr.io`.
+The server also needs a one-time `docker login registry.cn-hangzhou.aliyuncs.com`
+to pull private images from ACR.
 
 ## Coding conventions
 
@@ -145,8 +148,8 @@ require a one-time `docker login ghcr.io`.
   store rate-limit counters keyed by client identifier (`X-Client-Id` header
   or client IP) and request logs, and it caches derived recognition results
   (aggregated part lists) in Redis keyed by the uploaded image's SHA-256.
-- **Deploy timeout**: GHCR pulls from mainland China take ~3 minutes, so the
-  SSH deploy step uses a 10-minute timeout and 60 × 5s health retries.
+- **Deploy timeout**: ACR pulls from mainland China are fast (~30s), so the
+  SSH deploy step uses a 5-minute timeout and 60 × 5s health retries.
 - **Tag releases**: Pushing a `v*` tag triggers both image build and deploy.
   Main-branch pushes still deploy `latest`.
 - **Naive UTC datetimes**: SQLAlchemy `DateTime` columns use `timezone=False`

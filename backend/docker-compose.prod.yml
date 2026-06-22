@@ -28,7 +28,7 @@ services:
       retries: 10
 
   backend:
-    image: ghcr.io/${GHCR_OWNER}/brickfinder-backend:${IMAGE_TAG:-latest}
+    image: registry.cn-hangzhou.aliyuncs.com/bricksplan/brickfinder-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       postgres:

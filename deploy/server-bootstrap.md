@@ -32,17 +32,20 @@ Copy `backend/docker-compose.prod.yml` (renamed `docker-compose.yml` on the serv
 and `deploy/.env.prod.example` (renamed `.env`) into `/opt/brickfinder/`.
 
 Fill in `.env`:
-- `GHCR_OWNER` — your GitHub username/org (lowercase)
 - `IMAGE_TAG` — `latest`
 - `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` — pick strong values
 
-## 5. GHCR login (one-time)
+## 5. Alibaba Cloud ACR login (one-time)
 
-If the image is private:
+The image is hosted on Alibaba Cloud Container Registry (ACR) for fast pulls from
+mainland China. Login once so the server can pull private images:
 
-    echo $GHCR_PAT | docker login ghcr.io -u <github-username> --password-stdin
+    docker login --username=<username> registry.cn-hangzhou.aliyuncs.com
 
-where `GHCR_PAT` is a classic PAT with `read:packages`.
+Enter the password when prompted. Credentials are cached in `~/.docker/config.json`.
+
+If you prefer not to use a password, create a fixed password in the ACR console
+under "Access Credentials" and use that.
 
 ## 6. First start
 
@@ -58,9 +61,11 @@ Expected: `{"status":"ok"}`. Now point a reverse proxy (Caddy/Nginx) at
 
 In your GitHub repo → Settings → Secrets and variables → Actions, add:
 
-| Secret name      | Value |
-|------------------|-------|
-| `DEPLOY_HOST`    | server IP / hostname |
-| `DEPLOY_USER`    | `deploy` |
-| `DEPLOY_SSH_KEY` | private half of the SSH key whose public half is in `~deploy/.ssh/authorized_keys` |
-| `DEPLOY_PORT`    | `22` (or your custom port) |
+| Secret name               | Value |
+|---------------------------|-------|
+| `DEPLOY_HOST`             | server IP / hostname |
+| `DEPLOY_USER`             | `deploy` |
+| `DEPLOY_SSH_KEY`          | private half of the SSH key whose public half is in `~deploy/.ssh/authorized_keys` |
+| `DEPLOY_PORT`             | `22` (or your custom port) |
+| `ALIYUN_REGISTRY_USERNAME` | your Alibaba Cloud registry username |
+| `ALIYUN_REGISTRY_PASSWORD` | your Alibaba Cloud registry password |

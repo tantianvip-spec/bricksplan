@@ -8,3 +8,6 @@ __pycache__/
 .mypy_cache/
 dist/
 *.egg-info/
+
+# Claude Code local harness settings; project conventions live in CLAUDE.md.
+.claude/settings.local.json

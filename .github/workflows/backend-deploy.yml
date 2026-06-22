@@ -88,12 +88,12 @@ jobs:
             mkdir -p /etc/docker
             cat > /etc/docker/daemon.json <<'EOF'
             {
-              "registry-mirrors": ["https://docker.m.daocloud.io"]
+              "registry-mirrors": ["https://dockerpull.com", "https://dockerhub.timeweb.cloud"]
             }
             EOF
             # Docker will pick up daemon.json on restart; trigger a config reload.
             systemctl restart docker 2>/dev/null || service docker restart 2>/dev/null || true
-            sleep 3
+            sleep 5
 
             docker compose pull
             docker compose up -d --remove-orphans

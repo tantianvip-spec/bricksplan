@@ -14,9 +14,9 @@ permissions:
   packages: write
 
 env:
-  ACR_REGISTRY: registry.cn-hangzhou.aliyuncs.com
-  ACR_NAMESPACE: bricksplan
-  ACR_IMAGE: brickfinder-backend
+  SWR_REGISTRY: swr.cn-east-3.myhuaweicloud.com
+  SWR_ORG: bricksplan
+  SWR_IMAGE: brickfinder-backend
 
 jobs:
   build-and-push:
@@ -31,12 +31,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to Alibaba Cloud ACR
+      - name: Log in to Huawei Cloud SWR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.ACR_REGISTRY }}
-          username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
-          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+          registry: ${{ env.SWR_REGISTRY }}
+          username: ${{ secrets.SWR_USERNAME }}
+          password: ${{ secrets.SWR_PASSWORD }}
 
       - name: Compute lowercase owner
         id: owner
@@ -48,7 +48,7 @@ jobs:
         with:
           images: |
             ghcr.io/${{ steps.owner.outputs.value }}/brickfinder-backend
-            ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/${{ env.ACR_IMAGE }}
+            ${{ env.SWR_REGISTRY }}/${{ env.SWR_ORG }}/${{ env.SWR_IMAGE }}
           tags: |
             type=raw,value=latest
             type=sha,format=short

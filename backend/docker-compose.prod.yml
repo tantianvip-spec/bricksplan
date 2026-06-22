@@ -28,7 +28,7 @@ services:
       retries: 10
 
   backend:
-    image: registry.cn-hangzhou.aliyuncs.com/bricksplan/brickfinder-backend:${IMAGE_TAG:-latest}
+    image: swr.cn-east-3.myhuaweicloud.com/bricksplan/brickfinder-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       postgres:

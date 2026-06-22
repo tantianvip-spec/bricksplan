@@ -67,10 +67,10 @@ Three GitHub Actions workflows, one responsibility each:
 1. `backend-ci.yml` — runs on every PR and push that touches `backend/`.
    Lints, type-checks, runs unit tests with coverage. Blocks merge on failure.
 2. `backend-image.yml` — runs on push to `main` or a `v*` tag touching
-   `backend/`. Builds the Docker image and pushes to both GHCR and Alibaba
-   Cloud ACR (for fast pulls from mainland China) with tags `latest`,
+   `backend/`. Builds the Docker image and pushes to both GHCR and Huawei
+   Cloud SWR (for fast pulls from mainland China) with tags `latest`,
    `sha-<short>`, and the git tag name. Uses `GITHUB_TOKEN` for GHCR and
-   `ALIYUN_REGISTRY_USERNAME`/`ALIYUN_REGISTRY_PASSWORD` secrets for ACR.
+   `SWR_USERNAME`/`SWR_PASSWORD` secrets for SWR.
 3. `backend-deploy.yml` — triggers after `backend-image` succeeds, on a `v*`
    tag push, or via manual dispatch. SSHes into the deploy server, rewrites
    `IMAGE_TAG` in `/opt/brickfinder/.env`, runs `docker compose pull && up -d`,
@@ -91,11 +91,11 @@ Redis). The compose file and the `.env` (with secrets + image tag) live in
 pulls, and restarts — it never edits compose files or recreates volumes.
 
 Image registry: images are pushed to both GitHub Container Registry (GHCR,
-global fallback) and Alibaba Cloud Container Registry (ACR, primary for
-deploy). The server pulls from ACR for fast downloads in mainland China.
-ACR credentials (`ALIYUN_REGISTRY_USERNAME`/`ALIYUN_REGISTRY_PASSWORD`) are
-stored as GitHub repo secrets and used by the image workflow for push; the
-server does `docker login` once during bootstrap.
+global fallback) and Huawei Cloud SWR (primary for deploy). The server pulls
+from SWR for fast downloads in mainland China. SWR credentials
+(`SWR_USERNAME`/`SWR_PASSWORD`) are stored as GitHub repo secrets and used
+by the image workflow for push; the server does `docker login` once during
+bootstrap.
 
 Reverse proxy / TLS is out of scope for M1 and not configured by these
 workflows. Point Caddy/Nginx at `localhost:8000` if you need HTTPS.
@@ -108,11 +108,11 @@ workflows. Point Caddy/Nginx at `localhost:8000` if you need HTTPS.
 - `DEPLOY_SSH_KEY` — private SSH key whose public half is in
   `~root/.ssh/authorized_keys` on the server
 - `DEPLOY_PORT` — `22`
-- `ALIYUN_REGISTRY_USERNAME` — Alibaba Cloud ACR username (for CI push)
-- `ALIYUN_REGISTRY_PASSWORD` — Alibaba Cloud ACR password (for CI push)
+- `SWR_USERNAME` — Huawei Cloud SWR username (for CI push)
+- `SWR_PASSWORD` — Huawei Cloud SWR password (for CI push)
 
-The server also needs a one-time `docker login registry.cn-hangzhou.aliyuncs.com`
-to pull private images from ACR.
+The server also needs a one-time `docker login swr.cn-east-3.myhuaweicloud.com`
+to pull private images from SWR.
 
 ## Coding conventions
 
@@ -148,7 +148,7 @@ to pull private images from ACR.
   store rate-limit counters keyed by client identifier (`X-Client-Id` header
   or client IP) and request logs, and it caches derived recognition results
   (aggregated part lists) in Redis keyed by the uploaded image's SHA-256.
-- **Deploy timeout**: ACR pulls from mainland China are fast (~30s), so the
+- **Deploy timeout**: SWR pulls from mainland China are fast (~30s), so the
   SSH deploy step uses a 5-minute timeout and 60 × 5s health retries.
 - **Tag releases**: Pushing a `v*` tag triggers both image build and deploy.
   Main-branch pushes still deploy `latest`.

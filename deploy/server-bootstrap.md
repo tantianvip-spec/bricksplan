@@ -35,17 +35,17 @@ Fill in `.env`:
 - `IMAGE_TAG` — `latest`
 - `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` — pick strong values
 
-## 5. Alibaba Cloud ACR login (one-time)
+## 5. Huawei Cloud SWR login (one-time)
 
-The image is hosted on Alibaba Cloud Container Registry (ACR) for fast pulls from
-mainland China. Login once so the server can pull private images:
+The image is hosted on Huawei Cloud SWR (Software Repository for Containers)
+for fast pulls from mainland China. Login once so the server can pull images:
 
-    docker login --username=<username> registry.cn-hangzhou.aliyuncs.com
+    docker login --username=<username> swr.cn-east-3.myhuaweicloud.com
 
 Enter the password when prompted. Credentials are cached in `~/.docker/config.json`.
 
-If you prefer not to use a password, create a fixed password in the ACR console
-under "Access Credentials" and use that.
+Generate the login credentials in the SWR console under "My Credentials" (访问凭证)
+or use a long-term AK/SK to generate a login command.
 
 ## 6. First start
 
@@ -67,5 +67,5 @@ In your GitHub repo → Settings → Secrets and variables → Actions, add:
 | `DEPLOY_USER`             | `deploy` |
 | `DEPLOY_SSH_KEY`          | private half of the SSH key whose public half is in `~deploy/.ssh/authorized_keys` |
 | `DEPLOY_PORT`             | `22` (or your custom port) |
-| `ALIYUN_REGISTRY_USERNAME` | your Alibaba Cloud registry username |
-| `ALIYUN_REGISTRY_PASSWORD` | your Alibaba Cloud registry password |
+| `SWR_USERNAME` | your Huawei Cloud SWR username |
+| `SWR_PASSWORD` | your Huawei Cloud SWR password |

@@ -81,6 +81,9 @@ jobs:
             _set_env POSTGRES_DB brickfinder
             _set_env POSTGRES_PASSWORD brickfinder
 
+            # Clean up old containers so the new ones can start.
+            docker ps -aq | xargs docker rm -f 2>/dev/null || true
+
             # Login to SWR so we can pull the private backend image.
             docker login -u ${{ secrets.SWR_USERNAME }} -p ${{ secrets.SWR_PASSWORD }} swr.cn-north-4.myhuaweicloud.com
 

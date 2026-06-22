@@ -40,7 +40,7 @@ Fill in `.env`:
 The image is hosted on Huawei Cloud SWR (Software Repository for Containers)
 for fast pulls from mainland China. Login once so the server can pull images:
 
-    docker login --username=<username> swr.cn-east-3.myhuaweicloud.com
+    docker login --username=<username> swr.cn-north-4.myhuaweicloud.com
 
 Enter the password when prompted. Credentials are cached in `~/.docker/config.json`.
 

@@ -111,7 +111,7 @@ workflows. Point Caddy/Nginx at `localhost:8000` if you need HTTPS.
 - `SWR_USERNAME` — Huawei Cloud SWR username (for CI push)
 - `SWR_PASSWORD` — Huawei Cloud SWR password (for CI push)
 
-The server also needs a one-time `docker login swr.cn-east-3.myhuaweicloud.com`
+The server also needs a one-time `docker login swr.cn-north-4.myhuaweicloud.com`
 to pull private images from SWR.
 
 ## Coding conventions

@@ -14,7 +14,7 @@ permissions:
   packages: write
 
 env:
-  SWR_REGISTRY: swr.cn-east-3.myhuaweicloud.com
+  SWR_REGISTRY: swr.cn-north-4.myhuaweicloud.com
   SWR_ORG: bricksplan
   SWR_IMAGE: brickfinder-backend
 

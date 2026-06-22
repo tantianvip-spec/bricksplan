@@ -24,13 +24,13 @@ def upgrade() -> None:
         sa.Column("recognize_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("match_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("translate_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("window_start", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("window_start", sa.DateTime(timezone=False), nullable=False),
     )
     op.create_table(
         "api_call_log",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column(
-            "ts", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+            "ts", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()
         ),
         sa.Column("route", sa.String(), nullable=False),
         sa.Column("cache_hit", sa.Boolean(), nullable=False),

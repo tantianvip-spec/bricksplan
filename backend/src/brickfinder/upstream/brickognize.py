@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
+
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from ..errors import AppError
 from ..logging import get_logger
@@ -76,6 +78,10 @@ class BrickognizeClient:
             except httpx.HTTPError as exc:
                 last_exc = exc
                 log.warning("brickognize_http_error", attempt=attempt, error=repr(exc))
+                continue
+            except (json.JSONDecodeError, ValidationError) as exc:
+                last_exc = exc
+                log.warning("brickognize_parse_error", attempt=attempt, error=repr(exc))
                 continue
 
         self._breaker.record_failure()

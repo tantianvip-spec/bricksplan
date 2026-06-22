@@ -29,15 +29,15 @@ async def recognize(
     client_key: str = Depends(get_client_key),
     settings: Settings = Depends(get_settings_dep),
 ) -> RecognizeResponse:
-    if not (image.content_type or "").startswith(_ALLOWED_PREFIX):
-        raise AppError(
-            code=ErrorCode.INVALID_INPUT,
-            message="image content-type must be image/*",
-            http_status=400,
-        )
-
-    data = await image.read()
     try:
+        if not (image.content_type or "").startswith(_ALLOWED_PREFIX):
+            raise AppError(
+                code=ErrorCode.INVALID_INPUT,
+                message="image content-type must be image/*",
+                http_status=400,
+            )
+
+        data = await image.read()
         if len(data) == 0:
             raise AppError(
                 code=ErrorCode.INVALID_INPUT,
@@ -59,7 +59,7 @@ async def recognize(
             client_key=client_key,
             now=utcnow(),
         )
-        await session.commit()
         return response
     finally:
+        await session.commit()
         await image.close()

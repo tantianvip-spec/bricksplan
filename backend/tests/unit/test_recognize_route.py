@@ -11,13 +11,18 @@ from brickfinder.deps import (
     get_recognize_service,
     get_settings_dep,
 )
+from brickfinder.errors import AppError
 from brickfinder.main import create_app
+from brickfinder.schemas.common import ErrorCode
 from brickfinder.schemas.recognize import PartItem, RecognizeResponse
 
 
 class FakeSession:
+    def __init__(self) -> None:
+        self.committed = False
+
     async def commit(self) -> None:
-        pass
+        self.committed = True
 
 
 class FakeService:
@@ -26,6 +31,15 @@ class FakeService:
             parts=[PartItem(part_num="3001", color_id=4, quantity=1, confidence=0.9)],
             cache_hit=False,
             low_confidence_count=0,
+        )
+
+
+class FailingService:
+    async def recognize(self, session: AsyncSession, **kwargs) -> RecognizeResponse:
+        raise AppError(
+            code=ErrorCode.UPSTREAM_ERROR,
+            message="boom",
+            http_status=502,
         )
 
 
@@ -73,3 +87,23 @@ def test_recognize_rejects_oversized_image(client):
     r = client.post("/v1/recognize", files=files)
     assert r.status_code == 400
     assert r.json()["code"] == "INVALID_INPUT"
+
+
+def test_recognize_commits_on_service_error(client):
+    app = create_app()
+    session = FakeSession()
+    app.dependency_overrides[get_db_session] = lambda: session
+    app.dependency_overrides[get_recognize_service] = lambda: FailingService()
+    app.dependency_overrides[get_client_key] = lambda: "ip:1"
+    app.dependency_overrides[get_settings_dep] = lambda: Settings(
+        database_url="postgresql+asyncpg://x",
+        redis_url="redis://x",
+        upload_max_bytes=1024 * 1024,
+    )  # type: ignore[call-arg]
+    test_client = TestClient(app, raise_server_exceptions=False)
+
+    files = {"image": ("a.png", io.BytesIO(b"\x89PNG\r\n\x1a\n"), "image/png")}
+    r = test_client.post("/v1/recognize", files=files)
+    assert r.status_code == 502
+    assert session.committed is True
+    app.dependency_overrides.clear()

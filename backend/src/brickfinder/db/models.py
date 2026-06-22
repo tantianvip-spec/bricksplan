@@ -17,7 +17,7 @@ class RateQuota(Base):
     recognize_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     match_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     translate_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    window_start: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False)
 
 
 class ApiCallLog(Base):
@@ -25,7 +25,7 @@ class ApiCallLog(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     ts: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
+        DateTime(timezone=False), nullable=False, server_default=func.now()
     )
     route: Mapped[str] = mapped_column(String, nullable=False)
     cache_hit: Mapped[bool] = mapped_column(Boolean, nullable=False)

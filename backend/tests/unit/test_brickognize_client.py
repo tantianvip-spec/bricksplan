@@ -71,6 +71,22 @@ async def test_timeout_returns_upstream_timeout(breaker):
 
 
 @pytest.mark.asyncio
+async def test_malformed_200_returns_upstream_error(breaker):
+    async with respx.mock(base_url="https://example.com") as router:
+        route = router.post("/predict/parts/").mock(return_value=Response(200, text="not json"))
+        async with AsyncClient() as http:
+            client = BrickognizeClient(
+                http=http, base_url="https://example.com", timeout=5.0, breaker=breaker
+            )
+            with pytest.raises(AppError) as ei:
+                await client.predict_parts(
+                    image_bytes=b"x", filename="x.jpg", content_type="image/jpeg"
+                )
+    assert ei.value.code == ErrorCode.UPSTREAM_ERROR
+    assert route.call_count == 2  # retried once
+
+
+@pytest.mark.asyncio
 async def test_breaker_open_skips_call():
     cb = CircuitBreaker(threshold=1, cooldown_seconds=30)
     cb.record_failure()  # open

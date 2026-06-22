@@ -9,14 +9,12 @@ WORKDIR /app
 
 # Install runtime deps from pyproject.toml (single source of truth).
 COPY pyproject.toml ./
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -e .
-
 COPY src/ ./src/
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir .
+
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
-
-ENV PYTHONPATH=/app/src
 
 EXPOSE 8000
 

@@ -46,6 +46,7 @@ jobs:
           source: "backend/docker-compose.prod.yml"
           target: "/opt/brickfinder/"
           strip_components: 1
+          overwrite: true
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -72,7 +73,15 @@ jobs:
             }
             _set_env IMAGE_TAG ${{ steps.tag.outputs.value }}
 
-            docker compose pull backend
+            # Rename compose file (prod → default).
+            cp docker-compose.prod.yml docker-compose.yml
+
+            # Ensure Postgres credentials exist in .env (use defaults if absent).
+            _set_env POSTGRES_USER brickfinder
+            _set_env POSTGRES_DB brickfinder
+            _set_env POSTGRES_PASSWORD brickfinder
+
+            docker compose pull
             docker compose up -d --remove-orphans
 
             # Smoke test /health with retries (up to ~5 minutes).

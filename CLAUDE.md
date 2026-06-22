@@ -51,8 +51,9 @@ up the dependencies. Run uvicorn natively for fast reload.
 
 - `pytest tests/unit` — fast, no Docker dependency, must pass on every commit
 - `pytest tests/integration` — uses testcontainers (real Postgres + Redis);
-  required to pass before merge but skipped in CI (Docker-in-Docker is slow
-  and flaky on GitHub-hosted runners); they remain runnable locally
+  runnable locally and exercised by the nightly `backend-integration.yml`
+  workflow; not run on every PR because Docker-in-Docker is slow and flaky
+  on GitHub-hosted runners
 - `ruff check .` — lint
 - `mypy src` — type check (strict mode)
 - External services (Brickognize, Rebrickable, DeepSeek) are NEVER hit in CI
@@ -67,13 +68,15 @@ Three GitHub Actions workflows, one responsibility each:
    Lints, type-checks, runs unit tests with coverage. Blocks merge on failure.
 2. `backend-image.yml` — runs on push to `main` or a `v*` tag touching
    `backend/`. Builds the Docker image and pushes to
-   `ghcr.io/<owner-lowercase>/brickfinder-backend` with tags `latest` and
-   `sha-<short>`. Uses the workflow's `GITHUB_TOKEN`.
+   `ghcr.io/<owner-lowercase>/brickfinder-backend` with tags `latest`,
+   `sha-<short>`, and the git tag name (for `v*` tags). Uses the workflow's
+   `GITHUB_TOKEN`.
 3. `backend-deploy.yml` — triggers after `backend-image` succeeds, on a `v*`
    tag push, or via manual dispatch. SSHes into the deploy server, rewrites
-   `IMAGE_TAG` in `/opt/brickfinder/.env`, runs `docker compose pull && up -d`,
-   then health-checks `/health` with 60 retries × 5s. Fails the workflow (and
-   surfaces container logs) if health doesn't come back.
+   `IMAGE_TAG` and `GHCR_OWNER` in `/opt/brickfinder/.env` without touching
+   secrets, runs `docker compose pull && up -d`, then health-checks `/health`
+   with 60 retries × 5s. Fails the workflow (and surfaces container logs) if
+   health doesn't come back.
 
 `workflow_dispatch` is enabled on the image and deploy workflows so we can
 rebuild or redeploy a specific tag without pushing new code. Pushing a tag
@@ -138,12 +141,21 @@ require a one-time `docker login ghcr.io`.
   (when a build detail page opens), per-field, cached permanently in Redis
   keyed by sha256 of the source text. English users skip translation.
 - **No accounts**: backup is a JSON file the user exports/imports manually.
-  The backend stores no user business data — only rate-limit counters and
-  request logs (no PII, no images).
+  The backend does not store raw user images or account profiles. It does
+  store rate-limit counters keyed by client identifier (`X-Client-Id` header
+  or client IP) and request logs, and it caches derived recognition results
+  (aggregated part lists) in Redis keyed by the uploaded image's SHA-256.
 - **Deploy timeout**: GHCR pulls from mainland China take ~3 minutes, so the
   SSH deploy step uses a 10-minute timeout and 60 × 5s health retries.
 - **Tag releases**: Pushing a `v*` tag triggers both image build and deploy.
   Main-branch pushes still deploy `latest`.
+- **Naive UTC datetimes**: SQLAlchemy `DateTime` columns use `timezone=False`
+  and the code stores naive UTC datetimes. This avoids asyncpg errors on
+  Postgres while keeping SQLite unit tests simple.
+- **Integration test layout**: `tests/integration/conftest.py` lives inside
+  `tests/integration/` so that `pytest tests/unit` never requires Docker.
+- **Coverage target**: unit tests must cover at least 80% of
+  `src/brickfinder/`; current baseline is ~93%.
 
 ## When in doubt
 

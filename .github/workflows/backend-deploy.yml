@@ -84,6 +84,17 @@ jobs:
             # Login to SWR so we can pull the private backend image.
             docker login -u ${{ secrets.SWR_USERNAME }} -p ${{ secrets.SWR_PASSWORD }} swr.cn-north-4.myhuaweicloud.com
 
+            # Configure Docker Hub mirror for mainland China, then restart Docker.
+            mkdir -p /etc/docker
+            cat > /etc/docker/daemon.json <<'EOF'
+            {
+              "registry-mirrors": ["https://docker.m.daocloud.io"]
+            }
+            EOF
+            # Docker will pick up daemon.json on restart; trigger a config reload.
+            systemctl restart docker 2>/dev/null || service docker restart 2>/dev/null || true
+            sleep 3
+
             docker compose pull
             docker compose up -d --remove-orphans
 

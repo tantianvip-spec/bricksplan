@@ -38,6 +38,15 @@ jobs:
           username: ${{ secrets.SWR_USERNAME }}
           password: ${{ secrets.SWR_PASSWORD }}
 
+      - name: Push base images to SWR
+        run: |
+          docker pull postgres:16-alpine
+          docker tag postgres:16-alpine ${{ env.SWR_REGISTRY }}/${{ env.SWR_ORG }}/postgres:16-alpine
+          docker push ${{ env.SWR_REGISTRY }}/${{ env.SWR_ORG }}/postgres:16-alpine
+          docker pull redis:7-alpine
+          docker tag redis:7-alpine ${{ env.SWR_REGISTRY }}/${{ env.SWR_ORG }}/redis:7-alpine
+          docker push ${{ env.SWR_REGISTRY }}/${{ env.SWR_ORG }}/redis:7-alpine
+
       - name: Compute lowercase owner
         id: owner
         run: echo "value=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"

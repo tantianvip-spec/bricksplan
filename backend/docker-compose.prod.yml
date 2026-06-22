@@ -2,7 +2,7 @@
 # Image tag is rewritten by CI/CD; ${IMAGE_TAG} default is "latest".
 services:
   postgres:
-    image: postgres:16-alpine
+    image: swr.cn-north-4.myhuaweicloud.com/bricksplan/postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -17,7 +17,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: swr.cn-north-4.myhuaweicloud.com/bricksplan/redis:7-alpine
     restart: unless-stopped
     volumes:
       - redisdata:/data

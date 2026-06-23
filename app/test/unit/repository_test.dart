@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:brickfinder/models/inventory_session.dart';
-import 'package:brickfinder/models/inventory_part.dart';
 import 'package:brickfinder/repository/database_helper.dart' as helper;
 
 void main() {

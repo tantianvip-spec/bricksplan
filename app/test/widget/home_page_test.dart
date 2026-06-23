@@ -11,13 +11,13 @@ void main() {
   testWidgets('home page renders', (tester) async {
     final db = await databaseFactoryFfi.openDatabase('');
     final repo = LocalRepository(testDb: db);
+    await repo.init();
     await tester.pumpWidget(
       MultiProvider(
         providers: [Provider(create: (_) => repo)],
         child: const MaterialApp(home: HomePage()),
       ),
     );
-    // Pump enough frames for async load to complete
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('BrickFinder'), findsOneWidget);

@@ -11,6 +11,7 @@ void main() {
   testWidgets('app starts and shows home page', (tester) async {
     final db = await databaseFactoryFfi.openDatabase('');
     final repo = LocalRepository(testDb: db);
+    await repo.init();
     await tester.pumpWidget(
       MultiProvider(
         providers: [Provider(create: (_) => repo)],

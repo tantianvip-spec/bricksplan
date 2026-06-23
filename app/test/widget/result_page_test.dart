@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:brickfinder/pages/result/result_page.dart';
 import 'package:brickfinder/repository/local_repository.dart';
+import 'package:brickfinder/models/inventory_part.dart';
 
 class FakeRepo extends LocalRepository {
   FakeRepo() : super(testDb: null);
   @override
   Future<void> init() async {}
   @override
-  Future<List> getParts(String id) async => [];
+  Future<List<InventoryPart>> getParts(String id) async => [];
 }
 
 void main() {

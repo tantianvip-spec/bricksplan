@@ -3,6 +3,8 @@
 **日期**：2026-06-23
 **状态**：Design (待 writing-plans 转 implementation plan)
 **基于**：`2026-06-21-lego-photo-build-finder-design.md` 总体设计
+**视觉设计**：乐高风格配色（红 #ED1C24 / 黄 #FFD700 / 蓝 #0055BF），5 页 mockup 已获用户确认
+**视觉确认**：2026-06-23 via visual companion（mockup 已获用户认可）
 
 ## 1. 范围
 

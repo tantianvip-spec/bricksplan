@@ -40,6 +40,11 @@ class LocalRepository {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
+  Future<void> updateSession(InventorySession session) async {
+    await _database.update('inventory_session', session.toMap(),
+        where: 'id = ?', whereArgs: [session.id]);
+  }
+
   Future<void> deleteSession(String id) async {
     await _database.delete('inventory_session', where: 'id = ?', whereArgs: [id]);
   }
@@ -53,5 +58,27 @@ class LocalRepository {
   Future<void> insertPart(InventoryPart part) async {
     await _database.insert('inventory_part', part.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> updatePart(InventoryPart part) async {
+    await _database.update(
+      'inventory_part',
+      part.toMap(),
+      where: 'session_id = ? AND part_num = ? AND color_id = ?',
+      whereArgs: [part.sessionId, part.partNum, part.colorId],
+    );
+  }
+
+  Future<void> deletePart(String sessionId, String partNum, int colorId) async {
+    await _database.delete(
+      'inventory_part',
+      where: 'session_id = ? AND part_num = ? AND color_id = ?',
+      whereArgs: [sessionId, partNum, colorId],
+    );
+  }
+
+  Future<void> deleteAllParts(String sessionId) async {
+    await _database.delete('inventory_part',
+        where: 'session_id = ?', whereArgs: [sessionId]);
   }
 }

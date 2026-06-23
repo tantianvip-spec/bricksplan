@@ -10,7 +10,11 @@ class CapturePage extends StatelessWidget {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source, imageQuality: 85);
     if (image != null && context.mounted) {
-      context.push('/confirm', extra: image.path);
+      final retakeId = GoRouterState.of(context).extra as String?;
+      final extra = retakeId != null
+          ? {'imagePath': image.path, 'retakeSessionId': retakeId}
+          : image.path;
+      context.push('/confirm', extra: extra);
     }
   }
 

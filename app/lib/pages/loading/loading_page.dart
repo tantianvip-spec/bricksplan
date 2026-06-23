@@ -10,7 +10,8 @@ import '../../models/inventory_part.dart';
 
 class LoadingPage extends StatefulWidget {
   final String imagePath;
-  const LoadingPage({super.key, required this.imagePath});
+  final String? sessionId;
+  const LoadingPage({super.key, required this.imagePath, this.sessionId});
 
   @override
   State<LoadingPage> createState() => _LoadingPageState();
@@ -32,16 +33,23 @@ class _LoadingPageState extends State<LoadingPage> {
 
       final response = await api.recognize(imagePath: widget.imagePath);
 
-      final sessionId = const Uuid().v4();
-      final now = DateTime.now();
-      final session = InventorySession(
-        id: sessionId,
-        name: '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} 识别',
-        createdAt: now,
-        updatedAt: now,
-        partCount: response.parts.length,
-      );
-      await repo.insertSession(session);
+      final sessionId = widget.sessionId ?? const Uuid().v4();
+
+      if (widget.sessionId == null) {
+        // New session (first-time recognize)
+        final now = DateTime.now();
+        final session = InventorySession(
+          id: sessionId,
+          name: '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} 识别',
+          createdAt: now,
+          updatedAt: now,
+          partCount: response.parts.length,
+        );
+        await repo.insertSession(session);
+      } else {
+        // Retake mode: clear old parts, insert new ones, update session
+        await repo.deleteAllParts(sessionId);
+      }
 
       for (final item in response.parts) {
         await repo.insertPart(InventoryPart(
@@ -52,6 +60,20 @@ class _LoadingPageState extends State<LoadingPage> {
           confidence: item.confidence,
           source: 'recognized',
         ));
+      }
+
+      if (widget.sessionId != null) {
+        final session = await repo.getSession(sessionId);
+        if (session != null) {
+          final updated = InventorySession(
+            id: session.id,
+            name: session.name,
+            createdAt: session.createdAt,
+            updatedAt: DateTime.now(),
+            partCount: response.parts.length,
+          );
+          await repo.updateSession(updated);
+        }
       }
 
       if (mounted) context.go('/result/$sessionId');

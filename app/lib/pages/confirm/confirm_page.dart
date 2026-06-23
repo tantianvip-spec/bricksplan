@@ -5,7 +5,9 @@ import '../../theme/app_theme.dart';
 
 class ConfirmPage extends StatelessWidget {
   final String imagePath;
-  const ConfirmPage({super.key, required this.imagePath});
+  final String? sessionId;
+
+  const ConfirmPage({super.key, required this.imagePath, this.sessionId});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,10 @@ class ConfirmPage extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    onPressed: () => context.push('/loading', extra: imagePath),
+                    onPressed: () => context.push('/loading', extra: {
+                      'imagePath': imagePath,
+                      'sessionId': sessionId,
+                    }),
                     child: const Text('开始识别', style: TextStyle(fontSize: 16)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.legoYellow,

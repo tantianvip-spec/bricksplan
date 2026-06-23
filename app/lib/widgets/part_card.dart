@@ -3,8 +3,21 @@ import '../models/inventory_part.dart';
 
 class PartCard extends StatelessWidget {
   final InventoryPart part;
+  final bool editable;
+  final VoidCallback? onIncrement;
+  final VoidCallback? onDecrement;
+  final VoidCallback? onDelete;
+  final VoidCallback? onConfirm;
 
-  const PartCard({super.key, required this.part});
+  const PartCard({
+    super.key,
+    required this.part,
+    this.editable = false,
+    this.onIncrement,
+    this.onDecrement,
+    this.onDelete,
+    this.onConfirm,
+  });
 
   Color _colorFromId(int id) {
     switch (id) {
@@ -50,7 +63,7 @@ class PartCard extends StatelessWidget {
                     ? const Center(child: Text('?', style: TextStyle(color: Colors.grey, fontSize: 18)))
                     : null,
               ),
-              if (isLowConfidence)
+              if (isLowConfidence && !editable)
                 const Positioned(top: -4, right: -4, child: Text('⚠️', style: TextStyle(fontSize: 14))),
             ],
           ),
@@ -60,15 +73,67 @@ class PartCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(part.partNum, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                Text(
-                  part.colorName ?? (isUnknownColor ? '未知颜色' : ''),
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                Row(
+                  children: [
+                    Text(
+                      part.colorName ?? (isUnknownColor ? '未知颜色' : ''),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    if (isLowConfidence && editable && onConfirm != null) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: onConfirm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green[100],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text('确认', style: TextStyle(fontSize: 10, color: Colors.green[800])),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
           ),
-          Text('×${part.quantity}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          if (editable) ...[
+            _RoundButton(Icons.remove, onDecrement),
+            const SizedBox(width: 8),
+            Text('${part.quantity}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 8),
+            _RoundButton(Icons.add, onIncrement),
+            const SizedBox(width: 4),
+            if (onDelete != null)
+              GestureDetector(
+                onTap: onDelete,
+                child: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+              ),
+          ] else
+            Text('×${part.quantity}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         ],
+      ),
+    );
+  }
+}
+
+class _RoundButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+  const _RoundButton(this.icon, this.onTap);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28, height: 28,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, size: 16),
       ),
     );
   }

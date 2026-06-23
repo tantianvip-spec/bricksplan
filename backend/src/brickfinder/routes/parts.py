@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,16 +27,15 @@ async def search_parts(
     q: str = Query(..., min_length=1, max_length=50),
     settings: Settings = Depends(get_settings_dep),
     client_key: str = Depends(get_client_key),
-    session: AsyncIterator[AsyncSession] = Depends(get_db_session),
+    session: AsyncSession = Depends(get_db_session),
 ) -> dict[str, object]:
-    async for s in session:
-        await _rate_limiter().check_and_bump(
-            s,
-            client_key=client_key,
-            route="recognize",
-            limit_per_day=settings.rate_limit_parts_search_per_day,
-            now=utcnow(),
-        )
+    await _rate_limiter().check_and_bump(
+        session,
+        client_key=client_key,
+        route="recognize",
+        limit_per_day=settings.rate_limit_parts_search_per_day,
+        now=utcnow(),
+    )
 
     cache_key = _SEARCH_CACHE_PREFIX + hash_text(q)
     cache = RedisCache(_redis())

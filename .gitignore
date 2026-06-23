@@ -20,3 +20,6 @@ Thumbs.db
 
 # Claude Code local harness settings
 .claude/settings.local.json
+
+# Visual companion screens
+.superpowers/

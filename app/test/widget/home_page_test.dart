@@ -14,6 +14,7 @@ void main() {
         child: const MaterialApp(home: HomePage()),
       ),
     );
+    await tester.pump();
     expect(find.text('拍照识别'), findsOneWidget);
     expect(find.text('历史清单'), findsOneWidget);
   });

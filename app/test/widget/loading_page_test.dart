@@ -14,6 +14,7 @@ void main() {
         child: const MaterialApp(home: LoadingPage(imagePath: '/test')),
       ),
     );
+    await tester.pump();
     expect(find.text('正在识别砖块…'), findsOneWidget);
   });
 }

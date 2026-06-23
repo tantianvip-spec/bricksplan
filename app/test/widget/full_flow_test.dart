@@ -13,6 +13,7 @@ void main() {
         child: const BrickFinderApp(),
       ),
     );
+    await tester.pump();
     expect(find.text('拍照识别'), findsOneWidget);
   });
 }

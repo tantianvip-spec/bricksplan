@@ -87,8 +87,6 @@ jobs:
             # Login to SWR so we can pull the private backend image.
             docker login -u ${{ secrets.SWR_USERNAME }} -p ${{ secrets.SWR_PASSWORD }} swr.cn-north-4.myhuaweicloud.com
 
-            # Login to SWR (all images are pulled from SWR).
-
             docker compose pull
             docker compose up -d --remove-orphans
 
@@ -103,4 +101,10 @@ jobs:
               docker compose logs --tail=200 backend || true
               exit 1
             fi
+
+            # Print backend logs for debugging.
+            echo "=== BACKEND LOGS ==="
+            docker compose logs --tail=30 backend
+            echo "=== END BACKEND LOGS ==="
+
             echo "Deployed: tag=${{ steps.tag.outputs.value }}"

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:brickfinder/pages/home/home_page.dart';
@@ -8,7 +9,7 @@ void main() {
   setUpAll(() => sqfliteFfiInit());
 
   testWidgets('app starts and shows home page', (tester) async {
-    final db = await databaseFactoryFfi.openDatabase(inMemoryPath: null);
+    final db = await databaseFactoryFfi.openDatabase('');
     final repo = LocalRepository(testDb: db);
     await tester.pumpWidget(
       MultiProvider(

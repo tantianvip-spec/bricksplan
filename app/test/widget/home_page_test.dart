@@ -9,7 +9,7 @@ void main() {
   setUpAll(() => sqfliteFfiInit());
 
   testWidgets('home page shows capture button', (tester) async {
-    final db = await databaseFactoryFfi.openDatabase(inMemoryPath: null);
+    final db = await databaseFactoryFfi.openDatabase('');
     final repo = LocalRepository(testDb: db);
     await tester.pumpWidget(
       MultiProvider(

@@ -15,13 +15,13 @@ class FakeRepo extends LocalRepository {
 
 void main() {
   testWidgets('result page renders app bar', (tester) async {
-    final repo = FakeRepo();
     await tester.pumpWidget(
       MultiProvider(
-        providers: [Provider(create: (_) => repo)],
+        providers: [Provider(create: (_) => FakeRepo())],
         child: const MaterialApp(home: ResultPage(sessionId: 'test')),
       ),
     );
+    await tester.pump();
     await tester.pump();
     expect(find.text('零件清单'), findsOneWidget);
   });

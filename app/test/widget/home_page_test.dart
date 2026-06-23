@@ -13,15 +13,17 @@ class FakeRepo extends LocalRepository {
   Future<List<InventorySession>> getAllSessions() async => [];
 }
 
+Widget buildTestWidget({LocalRepository? repo}) {
+  return MultiProvider(
+    providers: [Provider(create: (_) => repo ?? FakeRepo())],
+    child: const MaterialApp(home: HomePage()),
+  );
+}
+
 void main() {
   testWidgets('home page renders app bar', (tester) async {
-    final repo = FakeRepo();
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [Provider(create: (_) => repo)],
-        child: const MaterialApp(home: HomePage()),
-      ),
-    );
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pump();
     await tester.pump();
     expect(find.text('BrickFinder'), findsOneWidget);
   });

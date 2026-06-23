@@ -104,7 +104,10 @@ jobs:
 
             # Print backend logs for debugging.
             echo "=== BACKEND LOGS ==="
-            docker compose logs --tail=30 backend
+            # Trigger a test recognize request to generate log output
+            curl -sf -X POST http://localhost:8000/v1/recognize -F "image=@/dev/null;type=image/png" 2>/dev/null || true
+            sleep 2
+            docker compose logs --tail=60 backend
             echo "=== END BACKEND LOGS ==="
 
             echo "Deployed: tag=${{ steps.tag.outputs.value }}"

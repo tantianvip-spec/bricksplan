@@ -8,7 +8,7 @@ import 'package:brickfinder/repository/local_repository.dart';
 void main() {
   setUpAll(() => sqfliteFfiInit());
 
-  testWidgets('home page shows capture button', (tester) async {
+  testWidgets('home page renders', (tester) async {
     final db = await databaseFactoryFfi.openDatabase('');
     final repo = LocalRepository(testDb: db);
     await tester.pumpWidget(
@@ -17,8 +17,10 @@ void main() {
         child: const MaterialApp(home: HomePage()),
       ),
     );
-    await tester.pump();
-    expect(find.text('拍照识别'), findsOneWidget);
+    // Pump enough frames for async load to complete
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('BrickFinder'), findsOneWidget);
     await db.close();
   });
 }

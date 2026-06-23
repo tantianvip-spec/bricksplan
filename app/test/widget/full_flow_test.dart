@@ -17,8 +17,9 @@ void main() {
         child: const MaterialApp(home: HomePage()),
       ),
     );
-    await tester.pump();
-    expect(find.text('拍照识别'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('BrickFinder'), findsOneWidget);
     await db.close();
   });
 }

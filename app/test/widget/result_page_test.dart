@@ -8,7 +8,7 @@ import 'package:brickfinder/repository/local_repository.dart';
 void main() {
   setUpAll(() => sqfliteFfiInit());
 
-  testWidgets('result page shows title', (tester) async {
+  testWidgets('result page renders', (tester) async {
     final db = await databaseFactoryFfi.openDatabase('');
     final repo = LocalRepository(testDb: db);
     await tester.pumpWidget(
@@ -17,7 +17,8 @@ void main() {
         child: const MaterialApp(home: ResultPage(sessionId: 'test')),
       ),
     );
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('零件清单'), findsOneWidget);
     await db.close();
   });

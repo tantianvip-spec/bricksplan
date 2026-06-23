@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:brickfinder/pages/home/home_page.dart';
 import 'package:brickfinder/api/api_client.dart';

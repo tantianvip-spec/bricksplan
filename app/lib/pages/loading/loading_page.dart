@@ -94,7 +94,7 @@ class _LoadingPageState extends State<LoadingPage> {
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const _AnimatedBrick(),
+                    _AnimatedBrick(),
                     const SizedBox(height: 24),
                     const Text('正在识别砖块…', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),

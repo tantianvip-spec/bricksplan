@@ -16,7 +16,6 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
-  InventorySession? _session;
   List<InventoryPart> _parts = [];
   bool _loading = true;
 

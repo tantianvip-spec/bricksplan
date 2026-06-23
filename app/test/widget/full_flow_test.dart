@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:brickfinder/main.dart';
 import 'package:brickfinder/repository/local_repository.dart';

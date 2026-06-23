@@ -3,7 +3,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../models/inventory_session.dart';
 import '../models/inventory_part.dart';
-import 'database_helper.dart';
+import 'database_helper.dart' as helper;
 
 class LocalRepository {
   Database? _db;
@@ -13,11 +13,11 @@ class LocalRepository {
 
   Future<void> init() async {
     if (inMemory) {
-      _db = await openDatabase(path: '', inMemory: true);
+      _db = await helper.createDb(path: '', inMemory: true);
     } else {
       final dir = await getApplicationDocumentsDirectory();
       final path = p.join(dir.path, 'brickfinder.db');
-      _db = await openDatabase(path: path, inMemory: false);
+      _db = await helper.createDb(path: path, inMemory: false);
     }
   }
 

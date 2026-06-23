@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<InventorySession> _sessions = [];
+  List<InventorySession> _sessions = [];
   bool _loading = true;
 
   @override

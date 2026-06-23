@@ -24,7 +24,7 @@ class PartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLowConfidence = part.confidence != null && part.confidence < 0.6;
+    final isLowConfidence = (part.confidence ?? 1.0) < 0.6;
     final isUnknownColor = part.colorId == -1;
 
     return Container(

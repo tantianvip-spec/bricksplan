@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
-const String _createSessionTable = '''
+const String createSessionTable = '''
 CREATE TABLE IF NOT EXISTS inventory_session (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL DEFAULT '',
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS inventory_session (
 )
 ''';
 
-const String _createPartTable = '''
+const String createPartTable = '''
 CREATE TABLE IF NOT EXISTS inventory_part (
   session_id TEXT NOT NULL REFERENCES inventory_session(id) ON DELETE CASCADE,
   part_num TEXT NOT NULL,
@@ -24,16 +24,19 @@ CREATE TABLE IF NOT EXISTS inventory_part (
 )
 ''';
 
-Future<Database> openDatabase({required String path, required bool inMemory}) async {
-  final db = inMemory
-      ? await databaseFactoryInMemory.openDatabase(path)
-      : await openDatabase(path, version: 1, onCreate: (db, version) async {
-          await db.execute(_createSessionTable);
-          await db.execute(_createPartTable);
-        });
+Future<Database> createDb({required String path, bool inMemory = false}) async {
+  Database db;
   if (inMemory) {
-    await db.execute(_createSessionTable);
-    await db.execute(_createPartTable);
+    db = await databaseFactoryInMemory.openDatabase(path);
+  } else {
+    db = await openDatabase(path, version: 1, onCreate: (db, version) async {
+      await db.execute(createSessionTable);
+      await db.execute(createPartTable);
+    });
+  }
+  if (inMemory) {
+    await db.execute(createSessionTable);
+    await db.execute(createPartTable);
   }
   return db;
 }

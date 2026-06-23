@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from .config import get_settings
 from .errors import register_exception_handlers
 from .logging import configure_logging
-from .routes import health, recognize
+from .routes import health, parts, recognize
 
 
 @asynccontextmanager
@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
     register_exception_handlers(app)
     app.include_router(health.router)
     app.include_router(recognize.router)
+    app.include_router(parts.router)
     return app
 
 

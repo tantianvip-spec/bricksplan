@@ -22,6 +22,11 @@ class Settings(BaseSettings):
 
     upload_max_bytes: int = 8 * 1024 * 1024  # 8 MB
 
+    rebrickable_api_key: str = ""
+    rebrickable_timeout_seconds: float = 15.0
+
+    rate_limit_parts_search_per_day: int = 500
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

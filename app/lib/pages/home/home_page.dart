@@ -20,12 +20,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     final repo = context.read<LocalRepository>();
     final sessions = await repo.getAllSessions();
+    if (!mounted) return;
     setState(() { _sessions = sessions; _loading = false; });
   }
 

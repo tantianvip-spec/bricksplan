@@ -29,12 +29,14 @@ class _ResultPageState extends State<ResultPage> {
   @override
   void initState() {
     super.initState();
-    _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     final repo = context.read<LocalRepository>();
     final parts = await repo.getParts(widget.sessionId);
+    if (!mounted) return;
     setState(() { _parts = parts; _loading = false; });
   }
 

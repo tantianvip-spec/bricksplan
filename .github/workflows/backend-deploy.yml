@@ -72,6 +72,7 @@ jobs:
               fi
             }
             _set_env IMAGE_TAG ${{ steps.tag.outputs.value }}
+            _set_env REBRICKABLE_API_KEY ${{ secrets.REBRICKABLE_API_KEY }}
 
             # Rename compose file (prod → default).
             cp docker-compose.prod.yml docker-compose.yml

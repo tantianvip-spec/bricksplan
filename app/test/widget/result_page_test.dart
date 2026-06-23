@@ -14,7 +14,6 @@ void main() {
         child: const MaterialApp(home: ResultPage(sessionId: 'nonexistent')),
       ),
     );
-    await tester.pumpAndSettle();
     expect(find.text('零件清单'), findsOneWidget);
   });
 }

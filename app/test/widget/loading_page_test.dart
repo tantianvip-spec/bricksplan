@@ -3,18 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:brickfinder/pages/loading/loading_page.dart';
 import 'package:brickfinder/api/api_client.dart';
-import 'package:brickfinder/repository/local_repository.dart';
 
 void main() {
   testWidgets('loading page shows recognizing text', (tester) async {
-    final repo = LocalRepository(inMemory: true);
-    await repo.init();
-
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           Provider(create: (_) => ApiClient(baseUrl: 'http://test')),
-          Provider(create: (_) => repo),
         ],
         child: const MaterialApp(home: LoadingPage(imagePath: '/test')),
       ),

@@ -7,18 +7,11 @@ import 'database_helper.dart' as helper;
 
 class LocalRepository {
   Database? _db;
-  final bool inMemory;
-
-  LocalRepository({this.inMemory = false});
 
   Future<void> init() async {
-    if (inMemory) {
-      _db = await helper.createDb(path: '', inMemory: true);
-    } else {
-      final dir = await getApplicationDocumentsDirectory();
-      final path = p.join(dir.path, 'brickfinder.db');
-      _db = await helper.createDb(path: path, inMemory: false);
-    }
+    final dir = await getApplicationDocumentsDirectory();
+    final path = p.join(dir.path, 'brickfinder.db');
+    _db = await helper.createDb(path: path);
   }
 
   Future<void> close() async {

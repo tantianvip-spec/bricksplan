@@ -24,19 +24,10 @@ CREATE TABLE IF NOT EXISTS inventory_part (
 )
 ''';
 
-Future<Database> createDb({required String path, bool inMemory = false}) async {
-  Database db;
-  if (inMemory) {
-    db = await databaseFactoryInMemory.openDatabase(path);
-  } else {
-    db = await openDatabase(path, version: 1, onCreate: (db, version) async {
-      await db.execute(createSessionTable);
-      await db.execute(createPartTable);
-    });
-  }
-  if (inMemory) {
+Future<Database> createDb({required String path}) async {
+  final db = await openDatabase(path, version: 1, onCreate: (db, version) async {
     await db.execute(createSessionTable);
     await db.execute(createPartTable);
-  }
+  });
   return db;
 }

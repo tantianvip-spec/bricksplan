@@ -6,6 +6,7 @@ import 'app_router.dart';
 import 'theme/app_theme.dart';
 import 'repository/local_repository.dart';
 import 'api/api_client.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

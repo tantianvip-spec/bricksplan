@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../repository/local_repository.dart';
-import '../../models/inventory_session.dart';
 import '../../models/inventory_part.dart';
 import '../../widgets/part_card.dart';
 import '../../widgets/empty_state.dart';
@@ -27,10 +26,8 @@ class _ResultPageState extends State<ResultPage> {
 
   Future<void> _load() async {
     final repo = context.read<LocalRepository>();
-    final session = await repo.getSession(widget.sessionId);
     final parts = await repo.getParts(widget.sessionId);
     setState(() {
-      _session = session;
       _parts = parts;
       _loading = false;
     });
